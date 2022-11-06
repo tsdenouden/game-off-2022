@@ -1,6 +1,66 @@
 // github game off
 
-// classes
+// 2d vectors
+class Vec2 {
+    x1;
+    y1;
+    x2;
+    y2;
+    ctx;
+    name;
+
+    constructor(x1,y1,x2,y2,ctx, name="Vec2") {
+        this.x1 = x1;
+        this.y1 = y1;
+        this.x2 = x2;
+        this.y2 = y2;
+        this.ctx = ctx;
+        this.name = name;
+    }
+    draw() {
+        ctx.save();
+        ctx.lineWidth=5;
+        ctx.beginPath();
+        ctx.moveTo(this.x1, this.y1);
+        ctx.lineTo(this.x2, this.y2);
+        ctx.stroke();
+        ctx.restore();
+    }
+    displacement() {
+        let x = Math.abs(this.x2-this.x1);
+        let y = Math.abs(this.y2-this.y1);
+        return [x,y]
+    }
+    mag() {
+        let [x,y] = this.displacement();
+        let mag = Math.sqrt(x*x + y*y)
+        return mag
+    }
+    normalize() {
+        let [x,y] = this.displacement();
+        let mag = this.mag();
+        if (mag > 0) {
+            let normal = [x/mag, y/mag];
+            return normal;
+        }
+        return 0;
+    }
+    drawStats(fontpx=15) {
+        let [x,y] = this.displacement();
+        let mag = this.mag();
+        let normal = this.normalize();
+        let fontSize = fontpx;
+
+        ctx.save();
+        ctx.font = `${fontSize}px Arial`;
+        ctx.fillText(`Vec2: ${this.name} Properties`, x/2, y/2);
+        ctx.fillText(`Magnitude: ${mag}`, x/2, (y/2)+(fontSize));
+        ctx.fillText(`Normalized: ${normal}`, x/2, (y/2)+(fontSize*2));
+        ctx.restore();
+    }
+}
+
+// PLAYER
 class Player {
     x;
     y;
@@ -58,6 +118,20 @@ class Player {
         this.sprite = document.getElementById(`player_${this.state}_${this.frame}`);
         // console.log(`player_${this.state}_${this.frame}`);
     }
+    setVec2(x,y, name="PlayerVec2") {
+        // create a vector between centre of player's sprite
+        // and (x,y)
+        let p_vector = new Vec2(
+            player.x+player.sprite.width/2,
+            player.y+(player.sprite.width*0.75),
+            x,
+            y,
+            ctx,
+            name
+        );
+        p_vector.draw();
+        return p_vector;
+    }
 }
 
 // check for multiple keystrokes
@@ -109,13 +183,15 @@ function playerMove() {
 }
 
 
-// gameplay logic
 
+
+// gameplay logic
 // vars
 let canvas;
 let ctx;
 let player;
 let input;
+let a;
 
 function init() {
     canvas = document.getElementById("game");
@@ -139,6 +215,8 @@ function process() {
 
     playerMove();
     player.draw();
+    let a = player.setVec2(100, 100);
+    a.drawStats();
     
     window.requestAnimationFrame(process);
 }

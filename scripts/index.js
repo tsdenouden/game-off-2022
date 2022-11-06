@@ -87,6 +87,7 @@ class Vec2 {
         this.drawNormalize();
         ctx.font = `${fontSize}px Arial`;
         // print properties
+        ctx.fillText(`(${this.x2}, ${this.y2})`, this.x2-30, this.y2-10)
         ctx.fillText(`Vec2: ${this.name} Properties`, x/2, y/2);
         ctx.fillText(`Magnitude: ${mag}`, x/2, (y/2)+(fontSize));
         ctx.fillText(`Normalized: ${normal}`, x/2, (y/2)+(fontSize*2));
@@ -196,6 +197,9 @@ function playerInput() {
         if (player.state !== "idle") {
             player.setState("idle");
         }
+
+        // toggle debug mode
+        if (e.key === "0") debug = !debug;
     });
 }
 
@@ -220,6 +224,7 @@ function playerMove() {
 
 // gameplay logic
 // vars
+let debug;
 let canvas;
 let ctx;
 let player;
@@ -249,7 +254,9 @@ function process() {
     playerMove();
     player.draw();
     let a = player.setVec2(100, 100);
-    a.drawStats();
+    if (debug) {
+        a.drawStats();
+    }
     
     window.requestAnimationFrame(process);
 }

@@ -29,19 +29,19 @@ class Vec2 {
     distance() {
         let x = this.x2-this.x1;
         let y = this.y2-this.y1;
-        console.log("Distance", `${x,y}`)
+        //console.log("Distance", `${x,y}`)
         return [x,y]
     }
     displacement() {
         let x = Math.abs(this.x2-this.x1);
         let y = Math.abs(this.y2-this.y1);
-        console.log("Displacement", `${x,y}`)
+        //console.log("Displacement", `${x,y}`)
         return [x,y]
     }
     mag() {
         let [x,y] = this.displacement();
         let mag = Math.sqrt(x*x + y*y)
-        console.log("Magnitude", mag)
+        //console.log("Magnitude", mag)
         return mag
     }
     normalize() {
@@ -51,7 +51,7 @@ class Vec2 {
         let mag = this.mag();
         if (mag > 0) {
             let normal = [x/mag, y/mag];
-            console.log("Normalized", normal[0], normal[1])
+            //console.log("Normalized", normal[0], normal[1])
             return normal;
         }
         return 0;
@@ -155,7 +155,7 @@ class Player {
         if (this.maxFrame !== 0) this.frame++;
         if (this.frame >= this.maxFrame) this.frame = 0;
         this.sprite = document.getElementById(`player_${this.state}_${this.frame}`);
-        console.log(`Sprite: player_${this.state}_${this.frame}`);
+        //console.log(`Sprite: player_${this.state}_${this.frame}`);
     }
     setVec2(x,y, visible=false, name="PlayerVec2") {
         // create a vector between centre of player's sprite

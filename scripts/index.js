@@ -26,6 +26,11 @@ class Vec2 {
         ctx.stroke();
         ctx.restore();
     }
+    distance() {
+        let x = this.x2-this.x1;
+        let y = this.y2-this.y1;
+        return [x,y]
+    }
     displacement() {
         let x = Math.abs(this.x2-this.x1);
         let y = Math.abs(this.y2-this.y1);
@@ -37,7 +42,9 @@ class Vec2 {
         return mag
     }
     normalize() {
-        let [x,y] = this.displacement();
+        // normalize vector
+        // deltaX/magnitude, deltaY/magnitude
+        let [x,y] = this.distance();
         let mag = this.mag();
         if (mag > 0) {
             let normal = [x/mag, y/mag];
@@ -45,14 +52,41 @@ class Vec2 {
         }
         return 0;
     }
+    drawNormalize(steps=75) {
+        // steps = how big do you want the unit vector to be when drawn
+        // drawing the unit vector with it's actual size makes it too small to be seen
+
+        let [x,y] = this.normalize();
+        ctx.save();
+        ctx.strokeStyle = "green";
+        ctx.lineWidth=8;
+        
+        // draw unit vector
+        ctx.beginPath();
+        ctx.moveTo(this.x1,this.y1);
+        ctx.lineTo(this.x1+(x*steps), this.y1+(y*steps));
+        ctx.stroke();
+
+        // draw unit circle around player
+        ctx.beginPath();
+        ctx.arc(this.x1, this.y1, steps, 0, 2 * Math.PI);
+        ctx.stroke();
+        ctx.restore();
+    }
     drawStats(fontpx=15) {
+        let fontSize = fontpx;
+
+        // properties
         let [x,y] = this.displacement();
         let mag = this.mag();
         let normal = this.normalize();
-        let fontSize = fontpx;
 
         ctx.save();
+        // draw vector
+        this.draw();
+        this.drawNormalize();
         ctx.font = `${fontSize}px Arial`;
+        // print properties
         ctx.fillText(`Vec2: ${this.name} Properties`, x/2, y/2);
         ctx.fillText(`Magnitude: ${mag}`, x/2, (y/2)+(fontSize));
         ctx.fillText(`Normalized: ${normal}`, x/2, (y/2)+(fontSize*2));
@@ -118,7 +152,7 @@ class Player {
         this.sprite = document.getElementById(`player_${this.state}_${this.frame}`);
         // console.log(`player_${this.state}_${this.frame}`);
     }
-    setVec2(x,y, name="PlayerVec2") {
+    setVec2(x,y, visible=false, name="PlayerVec2") {
         // create a vector between centre of player's sprite
         // and (x,y)
         let p_vector = new Vec2(
@@ -129,7 +163,9 @@ class Player {
             ctx,
             name
         );
-        p_vector.draw();
+        if (visible) {
+            p_vector.draw();
+        }
         return p_vector;
     }
 }
@@ -181,9 +217,6 @@ function playerMove() {
     if (player.x >= canvas.width-100) player.x = canvas.width-100;
     if (player.y >= canvas.height-100) player.y = canvas.height-100;
 }
-
-
-
 
 // gameplay logic
 // vars

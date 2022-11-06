@@ -1,10 +1,12 @@
 // github game off
 
+// classes
 class Player {
     x;
     y;
     ctx;
     spd;
+    dir;
     sprite;
     state;
     frame;
@@ -16,17 +18,38 @@ class Player {
         this.ctx = ctx;
         this.sprite = document.getElementById("player_idle_0");
         this.frame = 0;
+        this.dir = 0;
     }
     draw(ctx=this.ctx) {
-        ctx.drawImage(this.sprite,this.x,this.y);
+        // left
+        if (this.dir) {
+            ctx.save();
+            ctx.translate(canvas.width, 0);
+            ctx.scale(-1, 1);
+            ctx.drawImage(this.sprite,(this.x-canvas.width+(this.sprite.width))*-1,this.y);
+            ctx.restore();
+        // right
+        } else {
+            ctx.drawImage(this.sprite,this.x,this.y);
+        }
     }
-    setSpd(spd) {
-        this.spd = spd;
+    animate(ms) {
+        window.setInterval(() => {
+            player.nextFrame();
+        },ms);
     }
     setState(state, maxFrame) {
         this.state = state;
         this.frame = 0;
-        this.maxFrame = maxFrame;
+
+        switch (state) {
+            case 'idle':
+                this.maxFrame = 4;
+                break;
+            case 'walk':
+                this.maxFrame = 4;
+                break;
+        }
         this.sprite = document.getElementById(`player_${state}_0`);
     }
     nextFrame() {
@@ -37,17 +60,62 @@ class Player {
     }
 }
 
-let canvas;
-let ctx;
-let player;
-let input;
-
+// check for multiple keystrokes
 let keys = {
     w: false,
     a: false,
     s: false,
     d: false
 };
+
+function playerInput() {
+    window.addEventListener("keydown", (e) => {
+        if (e.key === "w") keys.w = true;
+        if (e.key === "a") keys.a = true;
+        if (e.key === "s") keys.s = true;
+        if (e.key === "d") keys.d = true;
+        if (player.state !== "walk") {
+            player.setState("walk");
+        }
+    });
+    window.addEventListener("keyup", (e) => {
+        if (e.key === "w") keys.w = false;
+        if (e.key === "a") keys.a = false;
+        if (e.key === "s") keys.s = false;
+        if (e.key === "d") keys.d = false;
+        if (player.state !== "idle") {
+            player.setState("idle");
+        }
+    });
+}
+
+function playerMove() {
+    if (keys.w === true) player.y -= player.spd;
+    if (keys.a === true) {
+        player.x -= player.spd;
+        player.dir = 1;
+    }
+    if (keys.s === true) player.y += player.spd;
+    if (keys.d === true) {
+        player.x += player.spd;
+        player.dir = 0;
+    }
+
+    // prevent player from leaving canvas
+    if (player.x <= 0) player.x = 0;
+    if (player.y <= 0) player.y = 0;
+    if (player.x >= canvas.width-100) player.x = canvas.width-100;
+    if (player.y >= canvas.height-100) player.y = canvas.height-100;
+}
+
+
+// gameplay logic
+
+// vars
+let canvas;
+let ctx;
+let player;
+let input;
 
 function init() {
     canvas = document.getElementById("game");
@@ -57,14 +125,11 @@ function init() {
     ctx = canvas.getContext("2d");
 
     player = new Player(100,100,ctx);
-    player.setSpd(10);
-    player.setState("idle", 4)
+    player.setState("idle")
     player.draw();
+    player.animate(200);
+    player.spd = 10;
     playerInput();
-
-    window.setInterval(() => {
-        player.nextFrame();
-    },200);
 
     window.requestAnimationFrame(process);
 }
@@ -76,40 +141,6 @@ function process() {
     player.draw();
     
     window.requestAnimationFrame(process);
-}
-
-function playerInput() {
-    window.addEventListener("keydown", (e) => {
-        if (e.key === "w") keys.w = true;
-        if (e.key === "a") keys.a = true;
-        if (e.key === "s") keys.s = true;
-        if (e.key === "d") keys.d = true;
-        if (player.state !== "walk") {
-            player.setState("walk", 4);
-        }
-    });
-    window.addEventListener("keyup", (e) => {
-        if (e.key === "w") keys.w = false;
-        if (e.key === "a") keys.a = false;
-        if (e.key === "s") keys.s = false;
-        if (e.key === "d") keys.d = false;
-        if (player.state !== "idle") {
-            player.setState("idle", 4);
-        }
-    });
-}
-
-function playerMove() {
-    if (keys.w === true) player.y -= player.spd;
-    if (keys.a === true) player.x -= player.spd;
-    if (keys.s === true) player.y += player.spd;
-    if (keys.d === true) player.x += player.spd;
-
-    // prevent player from leaving canvas
-    if (player.x <= 0) player.x = 0;
-    if (player.y <= 0) player.y = 0;
-    if (player.x >= canvas.width-100) player.x = canvas.width-100;
-    if (player.y >= canvas.height-100) player.y = canvas.height-100;
 }
 
 window.onload = (e) => {
